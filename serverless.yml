@@ -1,0 +1,53 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: badger
+
+provider:
+  name: aws
+  runtime: python2.7
+
+functions:
+  main:
+    handler: fetcher.main
+    events:
+      - http:
+          path: classes
+          method: get
+  classify:
+    handler: handler.classify
+    events:
+      - sns: classify-topic
+
+resources:
+  Resources:
+    urlsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: badger_urlsTable
+        AttributeDefinitions:
+          - AttributeName: url
+            AttributeType: S
+          - AttributeName: classes
+            AttributeType: B
+          # Maybe we should have some info about the place too? Or some unique
+          # identifier for the image?
+          # Also, check to make sure these types and all are correct. We should
+          # be able to just dump a "map" of the python dict into the 'B' (binary)
+          # attribute type.
+        KeySchema:
+          - AttributeName: url
+            AttributeType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 25
+          WriteCapacityUnits: 25
